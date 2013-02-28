@@ -11,6 +11,6 @@ $ ->
     $(".navbar #nav-#{id}").addClass("active")
 
   $(".navbar .nav").on "click", "a", (e) ->
-    router.navigate $(this).attr('href'), {trigger: true}
+    router.navigate $(@).attr('href'), {trigger: true}
 
   Backbone.history.start()

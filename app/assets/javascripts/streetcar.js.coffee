@@ -6,12 +6,12 @@ $ ->
   class StopPredictions extends Backbone.Collection
     model: Prediction,
     initialize: (options) ->
-      this.route = options.route
-      this.stop = options.stop
-      this.id = options.id
+      @route = options.route
+      @stop = options.stop
+      @id = options.id
     set: (attrs, options) -> # hack to get collection -> collection updates working
-      this.update(attrs.response, options)
-      this.sort()
+      @update(attrs.response, options)
+      @sort()
     _validate: (attrs, options) -> # just so we can use collections of collections
       true
     parse: (response) ->
@@ -31,12 +31,12 @@ $ ->
     model: StopPredictions
     url: "http://webservices.nextbus.com/service/publicXMLFeed",
     initialize: (models) ->
-      this.monitored_stops = models
+      @monitored_stops = models
     poll: (interval) ->
-      if (this.interval)
-        window.clearInterval this.interval
-      this.fetch()
-      this.interval = window.setInterval _.bind(this.fetch, this), interval
+      if (@interval)
+        window.clearInterval @interval
+      @fetch()
+      @interval = window.setInterval _.bind(@fetch, @), interval
     fetch: ->
       multistop_naming = (stop) ->
         stop.route + '|' + stop.stop
@@ -49,27 +49,27 @@ $ ->
         data:
           command: 'predictionsForMultiStops'
           a: 'ttc'
-          stops: _.map(this.monitored_stops, multistop_naming)
+          stops: _.map(@.monitored_stops, multistop_naming)
       super options
     parse: (response) ->
-      _.map this.monitored_stops, (stop) ->
+      _.map @monitored_stops, (stop) ->
         stop.response = $(response).find("predictions[routeTag=#{stop.route}][stopTag=#{stop.stop}]")
         stop
 
   class StopPredictionView extends Backbone.View
     initialize: ->
-      _.bindAll(this, 'render')
-      this.collection.on 'add', this.render
-      this.collection.on 'remove', this.render
-      this.collection.on 'change', this.render
-      this.collection.on 'reset', this.render
-      this.interval = window.setInterval this.render, 1000
+      _.bindAll(@, 'render')
+      @collection.on 'add', @render
+      @collection.on 'remove', @render
+      @collection.on 'change', @render
+      @collection.on 'reset', @render
+      @interval = window.setInterval @render, 1000
     render: ->
       human_readable = (date) ->
         if (date < new Date)
           return 'due'
         date.relative (val,unit) -> "#{val}&nbsp;#{Date.getLocale().units[unit][0..2]}"
-      this.$el.html(_.map(this.collection.pluck('date'), human_readable).join("<span class='comma'>, </span>"))
+      @$el.html(_.map(@collection.pluck('date'), human_readable).join("<span class='comma'>, </span>"))
 
   monitored_stops = [
     {id: 'spadinanorth', route: 510, stop: 6577}
